@@ -27,6 +27,9 @@ def yshear(shy):
 	yshmat=np.float32([[1,0,0],[shy,1,0],[0,0,1]])	
 	return yshmat	
 
+
+
+
 #Affine Transformation-Non-Homogenous
 def block_haff(x,y):
 	block=[[x,y,1,0,0,0],[0,0,0,x,y,1]]
@@ -151,16 +154,51 @@ def get_hper_h(n,pointsar):
 
 	return H1
 
-		
+
+def errorcalc(Diff):
+	sum=np.float32(0);
+	i=0
+	j=0
+	while (i<3):
+		j=0
+		while (j<3):
+			sum=sum+np.abs(Diff[i][j])
+			j=j+1
+		i=i+1
+	return sum		
 
 
 
 
+def formpoints(pointsar,n):
+	pts=np.array(pointsar)
 
+	if(n==10):
+		pt1=np.zeros((5,2))
+		pt2=np.zeros((5,2))
+	if(n==12):
+		pt1=np.zeros((6,2))
+		pt2=np.zeros((6,2))
+	if(n==6):
+		pt1=np.zeros((3,2))
+		pt2=np.zeros((3,2))
+	if(n==8):
+		pt1=np.zeros((4,2))
+		pt2=np.zeros((4,2))
+	i=0
+	k=0
+	j=0
+	while(i<n):
+		j=0
+		while(j<2):
+			pt1[k][j]=pts[i][j]
+			pt2[k][j]=pts[i+1][j]
+			j=j+1
+		k=k+1
+		i=i+2	
+	return pt1,pt2	
 
-
-
-
+'''
 
 
 def blockfn_inv(x,y,x_t,y_t):
@@ -237,4 +275,4 @@ def generateH(n,pointsar):
 		H=H2
 
 	return H
-			
+'''
