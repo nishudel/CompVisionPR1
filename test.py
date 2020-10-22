@@ -1,31 +1,80 @@
 import numpy as np
-import functionspr1a as fnc
 import pdb
+import copy
+import cv2
 
-'''
-H=np.identity(3)
-I=np.identity(5)
+def convfn(I,H):
+	ri=I.shape[0]
+	ci=I.shape[1]
+	rh=H.shape[0]
+	ch=H.shape[1]
+	a=int((rh-1)/2)
+	b=int((ch-1)/2)
+	iconv=np.ones(I.shape)
+	img=np.pad(I, ((a,b), (a,b),(0,0)), 'constant')
+
+	for i in range(a,a+ri):
+		for j in range(b,b+ci):
+			iconv[i-a,j-b,:]=np.sum(np.sum(np.multiply(H[:],img[i-a:i-a+rh,j-b:j-b+ch,:]),0),0) 
 
 
-A=fnc.convolfn(I,H)
-#print(np.array(H[0:3,0:3]))
 
-print(A)
+	return iconv
 
-'''
-'''
-a = [[1, 2], [3, 4]]
-#a_1=np.pad(a, ((3, 3), (3, 3)), 'minimum')
-a_1=np.pad(a, ((1, 2), (1, 3)), 'constant')
-#pdb.set_trace( )
-print(a_1)
-'''
-'''
-a = np.array([[1, 2], [3, 4]])
-b = 2*a
-c=a*b
-print(c)
-'''
-A=[1,2,3,4,5,6,7,8,9,10,16,12,15]
-for i in range(3,10):
-	print(A[i-3])
+def Reduce(img):
+	kernel=(1/16)*np.array([[1,2,1],[2,4,2],[1,2,1]])
+	#dst = Convolve(img,kernel)
+	dst = cv2.filter2D(img,-1,kernel)
+	convolv_img=np.array(dst)
+	nr=np.shape(convolv_img)[0]
+	nc=np.shape(convolv_img)[1]
+	#scaling_img=np.zeros((nr,nc,3))
+	interp_img= np.zeros((int(nr/2),int(nc/2),3),np.uint8)
+	
+	
+	for i in range(int(nr/2)):
+		for j in range(int(nc/2)):
+			#scaling_img[2*i,2*j,:]=convolv_img[2*i,2*j,:]/255
+			interp_img[i,j,:]=convolv_img[2*i,2*j,:]
+
+	new_img=np.uint8(interp_img)
+
+	return new_img
+
+def GaussianPyramid(image,n):
+	pyramid=[image]
+	img_new=image
+	for i in range(1,n):
+		img_new=Reduce(img_new)
+		pyramid.append(img_new)
+	
+	for j in range(n):
+		#print(pyramid[j].shape)
+		#pdb.set_trace()
+		cv2.imshow('pyramid',pyramid[j])		
+		cv2.waitKey(0)	
+	
+
+	return pyramid
+
+
+
+
+
+
+if __name__ == '__main__':
+	I=cv2.imread('totoro.jpg')
+	"""
+	H1=(1/16)*np.array([[1,2,1],[2,4,2],[1,2,1]])
+	H=np.array([H1,H1,H1])
+	#print(I[2,:,1])
+	cv2.imshow('I',I)
+	pdb.set_trace()
+	A=convfn(I,H)
+	B=np.uint8(np.clip(A,0,255))
+	cv2.imshow('new_img',B)
+	cv2.waitKey(0)
+
+	"""
+	img=GaussianPyramid(I,4)
+
